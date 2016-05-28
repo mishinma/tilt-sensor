@@ -13,7 +13,10 @@ uint8_t Define_Orientation(int8_t x, int8_t y, int8_t z);
 
 
 #define PRECISION   18  // resolution of measured acceleration in mg
-#define G           0x56 // according to LIS302DL range
+#define G           0x38 // according to LIS302DL range
+#define PI_HALF 1571
+#define PI 3142
+
 #define BOTTOM       0
 #define TOP          1
 #define RIGHT        2
@@ -46,20 +49,23 @@ uint8_t Define_Orientation(int8_t x, int8_t y, int8_t z);
                                                         ==========================================*/
 
 
-#define E                  ((uint8_t) 0x04)
-#define RW                 ((uint8_t) 0x02)
-#define RS                 ((uint8_t) 0x01)
+#define E                   ((uint8_t) 0x04)
+#define RW                  ((uint8_t) 0x02)
+#define RS                  ((uint8_t) 0x01)
 
-#define FUNCTION_SET       ((uint8_t) 0x38)     
-#define CLEAR_DISPLAY      ((uint8_t) 0x01)
-#define ENTRY_MODE_SET     ((uint8_t) 0x06)
-#define DISPLAY_ON         ((uint8_t) 0x0C)
-#define CURSOR_SHIFT_RIGHT ((uint8_t) 0x14)
-#define CURSOR_SHIFT_LEFT  ((uint8_t) 0x10)
+#define FUNCTION_SET        ((uint8_t) 0x38)     
+#define CLEAR_DISPLAY       ((uint8_t) 0x01)
+#define ENTRY_MODE_SET      ((uint8_t) 0x06)
+#define DISPLAY_ON          ((uint8_t) 0x0C)
+#define SET_ADDRESS_2nd_ROW ((uint8_t) 0xC0) 
+#define CURSOR_SHIFT_RIGHT  ((uint8_t) 0x14)
+#define CURSOR_SHIFT_LEFT   ((uint8_t) 0x10)
 
 #define T500n 4
 #define T40u  320
 #define T1m53  12300
+
+#define DEG 0xEF
 
 void LCD_GPIO_Init(void);
 void LCD_OutCmd(uint8_t command);
@@ -207,4 +213,11 @@ void I2C1_AcknowledgeConfig(FunctionalState NewState);
 #define I2C1_SR2                        (I2C1_BASE+0x18)
 
 
+/*========================================
+     
+                                         FUNCTIONS FROM atan_lut
+                                                        ==========================================*/
 
+int16_t atan_lut(int8_t, int8_t);
+int16_t atan2_lut(int8_t, int8_t);
+int16_t rad2deg(int16_t);

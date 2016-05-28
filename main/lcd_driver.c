@@ -209,35 +209,6 @@ void __out_ctrl(uint8_t data){
 }
 
 
-/* write data to the control lines
-   E     RW     RS    
-   PB12  PB11   PB10  */
-void __out_ctr(uint8_t data){
-    /* PB10 - RS */
-    if (data & 0x01) {
-        SET_BIT(GPIOB->BSRR, GPIO_BSRR_BS10);    // set bit
-    }
-    else{
-        SET_BIT(GPIOB->BSRR, GPIO_BSRR_BR10);    // reset bit
-    }
-    data >>= 1;
-    /* PB11 - RW */
-    if (data & 0x01) {
-        SET_BIT(GPIOB->BSRR, GPIO_BSRR_BS11);    // set bit
-    }
-    else{
-        SET_BIT(GPIOB->BSRR, GPIO_BSRR_BR11);    // reset bit
-    }
-    data >>= 1;
-    /* PB12 - E */
-    if (data & 0x01) {
-        SET_BIT(GPIOB->BSRR, GPIO_BSRR_BS12);    // set bit
-    }
-    else{
-        SET_BIT(GPIOB->BSRR, GPIO_BSRR_BR12);    // reset bit
-    }
-}
-
 void LCD_GPIO_Init(void){
   /*LCD GPIO Configuration    
     PA12     ------> DB7

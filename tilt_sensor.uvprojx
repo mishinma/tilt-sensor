@@ -423,6 +423,11 @@
               <FileType>1</FileType>
               <FilePath>.\main\lcd_driver.c</FilePath>
             </File>
+            <File>
+              <FileName>atan_lut.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\main\atan_lut.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -12,13 +12,17 @@
 
 #include "tilt_sensor.h"
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 
 void tilt_sensor(void)
 {
     //uint8_t who_am_i = 0;
     uint8_t  counter, state;
-    __IO int8_t x = 0, y = 0, z = 0;
+    int8_t x, y, z, x0=0, y0=0, z0=G, alpha=10;
+    int16_t phi, theta, temp;
+    char out_roll[20], out_pitch[20];
     RCC_Init();
     SysTick_Init();
     GPIOA_Init();
@@ -32,39 +36,45 @@ void tilt_sensor(void)
     //Read_Register(CTRL_REG2);
     Write_Register(CTRL_REG1, 0x47);
     SysTick_Wait(T0s03); // Turn-on time 3/ODR = 0.03 s 
-    //Read_Register(STATUS_REG);
-    //x = Read_Register(OUT_X);
-    //y = Read_Register(OUT_Y);
-    //z = Read_Register(OUT_Z); 
+   
     while(1)  {
                x = Read_Register(OUT_X);
                y = Read_Register(OUT_Y);
-               z = Read_Register(OUT_Z);
-               state = Define_Orientation(x, y, z);
+               z = - Read_Register(OUT_Z);
+        
+               //Low pass filter; alpha = 0.3
+               x = x + (alpha*(x - x0))/100;
+               y = y + (alpha*(y - y0))/100;
+               z = z + (alpha*(z - z0))/100;
+               x0 = x;
+               y0 = y;
+               z0 = z;
+               temp = (int)(sqrt(y*y + z*z)+0.5);
+               phi = atan2_lut(z,y);
+               theta = atan2_lut(temp, -x);
+               phi = rad2deg(phi)/10;
+               theta = rad2deg(theta)/10;
+               sprintf(out_roll, "R: %d%c", phi, DEG);
+               
+               sprintf(out_pitch, "P: %d%c", theta, DEG);
+        
+        
                LCD_OutCmd(CLEAR_DISPLAY);
                SysTick_Wait(T1m53);   
-               LCD_OutCmd(CURSOR_SHIFT_RIGHT);
+               // LCD_OutCmd(CURSOR_SHIFT_RIGHT);
+               // SysTick_Wait(T40u);
+                
+               LCD_OutString(out_roll);
                SysTick_Wait(T40u);
-                switch (state){
-                    case BOTTOM:
-                        LCD_OutString("Bottom");
-                        break;
-                    case TOP:
-                        LCD_OutString("Top");
-                        break;
-                    case RIGHT:
-                        LCD_OutString("Right");
-                        break;
-                    case LEFT:
-                        LCD_OutString("Left");
-                        break;            
-                    default:
-                        LCD_OutString("Bottom");
-                }
-                SysTick_Wait(T0s25); 
-                WRITE_REG(GPIOA->BSRR, GPIO_BSRR_BS3);		 
-                SysTick_Wait(T0s25); 
-                WRITE_REG(GPIOA->BSRR, GPIO_BSRR_BR3);
+               LCD_OutCmd(SET_ADDRESS_2nd_ROW);
+               SysTick_Wait(T40u);
+               LCD_OutString(out_pitch);
+               
+               SysTick_Wait(T0s25); 
+               WRITE_REG(GPIOA->BSRR, GPIO_BSRR_BS3);		 
+               SysTick_Wait(T0s25); 
+               WRITE_REG(GPIOA->BSRR, GPIO_BSRR_BR3);
+               SysTick_Wait(T0s25); 
                 
     }
     
@@ -106,7 +116,7 @@ void GPIOA_Init(void)
 
 void RCC_Init(void) 
 {
-    /* Reset the RCC clock configuration to the default reset state(for debug purpose) */
+    /* Reset the RCC clock configuration to the default reset state (for debug purpose) */
     /* Set HSION bit */
     
     SET_BIT(RCC->CR, RCC_CR_HSION);
